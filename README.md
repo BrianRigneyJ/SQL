@@ -1,1 +1,2 @@
 # SQL
+This project creates a simple relational database consisting of multiple tables meant to mimic a library. There are tables for books, authors, clients (those borrowing books), and a table to keep track of the actual borrowing. This was created with MySql version 8.0.12 for Mac OS.
