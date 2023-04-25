@@ -1,0 +1,99 @@
+# This file consists of various queries to analyze the database
+
+# Query 1: First and last names of clients that borrowed books in March 2018
+SELECT Client.ClientFirstName, Client.ClientLastName, Borrower.BorrowDate
+FROM Client
+INNER JOIN Borrower
+ON Client.ClientID = Borrower.ClientID
+WHERE Borrower.BorrowDate BETWEEN "2018-03-01" AND "2018-03-31";
+
+# Query 2: First and last names of the top 5 authors clients borrowed in 2017
+
+SELECT COUNT(Borrower.BorrowID) AS Borrows, Author.AuthorFirstName, Author.AuthorLastName
+FROM Borrower
+Inner Join Book ON Borrower.BookID = Book.BookID
+Inner Join Author ON Book.AuthorID = Author.AuthorID
+WHERE Borrower.BorrowDate BETWEEN "2017-01-01" AND "2017-12-31"
+GROUP BY Author.AuthorFirstName, Author.AuthorLastName
+ORDER BY Borrows DESC
+# Limit to top-5
+LIMIT 5;
+
+# Query 3: Nationalities of the least 5 authors that clients borrowed during the years 2015-2017
+SELECT COUNT(Borrower.BorrowID) AS Borrows, Author.AuthorNationality, Author.AuthorFirstName, Author.AuthorLastName
+FROM Borrower
+Inner Join Book ON Borrower.BookID = Book.BookID
+Inner Join Author ON Book.AuthorID = Author.AuthorID
+WHERE Borrower.BorrowDate BETWEEN "2015-01-01" AND "2017-12-31"
+GROUP BY Author.AuthorFirstName, Author.AuthorLastName, Author.AuthorNationality
+ORDER BY Borrows ASC
+LIMIT 5;
+
+# Query 4: The book that was most borrowed during the years 2015-2017
+
+SELECT COUNT(Borrower.BorrowID) AS Borrows, Book.BookTitle
+FROM Borrower
+Inner Join Book ON Borrower.BookID = Book.BookID
+WHERE Borrower.BorrowDate BETWEEN "2015-01-01" AND "2017-12-31"
+GROUP BY Book.BookTitle
+ORDER BY Borrows DESC
+LIMIT 1;
+
+# Query 5: Top borrowed genres for client born in years 1970-1980
+SELECT COUNT(Borrower.BorrowId) AS Borrows, Book.Genre
+FROM Borrower
+INNER JOIN Book
+ON Borrower.BookId = Book.BookId
+INNER JOIN Client
+ON Borrower.ClientId = Client.ClientId
+# Filter for Client DOB
+WHERE Client.ClientDOB BETWEEN '1970' AND '1980'
+GROUP BY Book.Genre
+# No limits for this prompt
+ORDER BY Borrows DESC;
+
+# Query 6: Top 5 occupations that borrowed the most in 2016
+SELECT COUNT(Borrower.BorrowId) AS Borrows, Client.Occupation
+FROM Borrower
+INNER JOIN Client
+ON Borrower.ClientId = Client.ClientId
+WHERE Borrower.BorrowDate BETWEEN "2016-01-01" AND "2016-12-31"
+GROUP BY Client.Occupation
+ORDER BY Borrows DESC;
+# Limit to 5
+Limit 5;
+
+# Query 7: Create a VIEW and display the titles that were borrowed by at least 10% of clients
+
+CREATE VIEW PopularBooks AS
+SELECT Count(Borrower.ClientID) AS Borrows, Book.BookTitle
+FROM Borrower
+INNER JOIN Book on Borrower.BookID = Book.BookID
+INNER JOIN Client on Borrower.ClientID = Client.ClientID
+GROUP BY Book.BookTitle
+HAVING Borrows >= (Count(Client.ClientID)*.1);
+# To use the view, you would SELECT * FROM PopularBooks;
+
+# Query 8: The top month of borrows in 2017
+
+SELECT MONTHNAME(Borrower.BorrowDate) AS MonthOfYear, Count(Borrower.BorrowID) AS Borrows
+FROM Borrower
+WHERE Borrower.BorrowDate BETWEEN "2017-01-01" AND "2017-12-31"
+GROUP BY MonthOfYear
+ORDER BY Borrows DESC;
+
+# Prompt 9: The oldest and the youngest clients of the library
+
+SELECT Client.ClientFirstName, Client.ClientLastName, Client.ClientDOB
+FROM Client
+# Using min and max subqueries as options for the IN selector
+WHERE Client.ClientDOB IN((SELECT MAX(ClientDOB) FROM Client), (SELECT MIN(ClientDOB) FROM Client))
+ORDER BY ClientDOB DESC;
+
+# Prompt 10: First and last names of authors that wrote books in more than one genre
+# Making sure to use distinct count of genres
+SELECT Author.AuthorFirstName, Author.AuthorLastName, COUNT(DISTINCT Book.Genre) AS Genres
+From Author
+INNER JOIN Book ON Author.AuthorID = Book.AuthorID
+GROUP BY Author.AuthorFirstName, Author.AuthorLastName
+HAVING Genres > 1;
