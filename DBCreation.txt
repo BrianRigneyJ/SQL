@@ -1,0 +1,56 @@
+# This was completed with MySql 8.0.12 for Mac OS
+
+# Create the DB schema
+CREATE SCHEMA `library`
+
+# Create a client table with an index on Client ID
+CREATE TABLE `library`.`Client` (
+    `ClientID` INT NOT NULL,
+    `ClientFirstName` VARCHAR(20) NOT NULL,
+    `ClientLastName` VARCHAR(20) NOT NULL,
+    `ClientDOB` YEAR NOT NULL,
+    `Occupation` VARCHAR(40) NOT NULL,
+    PRIMARY KEY (`ClientID`),
+    UNIQUE INDEX `ClientID_UNIQUE` (`ClientID` ASC) VISIBLE)
+
+# Create an author table with an index on Author ID
+CREATE TABLE `library`.`Author` (
+    `AuthorID` INT NOT NULL,
+    `AuthorFirstName` VARCHAR(20) NOT NULL,
+    `AuthorLastName` VARCHAR(20) NOT NULL,
+    `AuthorNationality` VARCHAR(20) NOT NULL,
+    PRIMARY KEY (`AuthorID`),
+    UNIQUE INDEX `AuthorID_UNIQUE` (`AuthorID` ASC) VISIBLE)
+
+# Create a book table
+CREATE TABLE `library`.`Book` (
+    `BookID` INT NOT NULL,
+    `BookTitle` VARCHAR(45) NOT NULL,
+    `AuthorID` INT NOT NULL,
+    `Genre` VARCHAR(20) NOT NULL,
+    PRIMARY KEY (`BookID`),
+    CONSTRAINT `AuthorID`
+      FOREIGN KEY (`AuthorID`)
+      REFERENCES `library`.`Author` (`AuthorID`)
+      ON DELETE RESTRICT
+      ON UPDATE RESTRICT)
+
+#Create a borrower table with indices for Client and Book ID
+CREATE TABLE `library`.`Borrower` (
+    `BorrowID` INT NOT NULL,
+    `ClientID` INT NOT NULL,
+    `BookID` INT NOT NULL,
+    `BorrowDate` DATE NOT NULL,
+    PRIMARY KEY (`BorrowID`),
+    INDEX `ClientID_idx` (`ClientID` ASC) VISIBLE,
+    INDEX `BookID_idx` (`BookID` ASC) VISIBLE,
+    CONSTRAINT `ClientID`
+      FOREIGN KEY (`ClientID`)
+      REFERENCES `library`.`Client` (`ClientID`)
+      ON DELETE RESTRICT
+      ON UPDATE RESTRICT,
+    CONSTRAINT `BookID`
+      FOREIGN KEY (`BookID`)
+      REFERENCES `library`.`Book` (`BookID`)
+      ON DELETE RESTRICT
+      ON UPDATE RESTRICT)
